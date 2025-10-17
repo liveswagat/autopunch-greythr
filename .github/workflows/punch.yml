@@ -1,0 +1,57 @@
+name: Daily Punch Automation
+
+on:
+  schedule:
+    # Punch In - 1 PM ± 5 min
+    - cron: "25 7 * * 1-5" # 7:25 UTC = 12:55 PM IST
+    - cron: "30 7 * * 1-5" # 1:00 PM IST
+    - cron: "35 7 * * 1-5" # 1:05 PM IST
+    # Punch Out - 10 PM ± 5 min
+    - cron: "25 16 * * 1-5" # 9:55 PM IST
+    - cron: "30 16 * * 1-5" # 10:00 PM IST
+    - cron: "35 16 * * 1-5" # 10:05 PM IST
+  workflow_dispatch: # allow manual run
+    inputs:
+      task:
+        description: "Run Punch In or Punch Out manually"
+        required: false
+        default: "punch_in"
+
+jobs:
+  run-scheduler:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Punch Script
+        env:
+          GREYTHR_URL: ${{ secrets.GREYTHR_URL }}
+          EMP_ID: ${{ secrets.EMP_ID }}
+          EMP_PASS: ${{ secrets.EMP_PASS }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          TIMEZONE: ${{ secrets.TIMEZONE }}
+        run: |
+          echo "🕒 Checking which script to run..."
+          current_hour=$(TZ=${{ secrets.TIMEZONE }} date +'%H')
+          if [ "$current_hour" -lt "14" ]; then
+            echo "⏰ Running punch in"
+            node src/login.js
+          else
+            echo "🌙 Running punch out"
+            node src/logout.js
+          fi
+
