@@ -1,0 +1,21 @@
+{
+  "name": "auto_punch-main",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "login": "node src/login.js",
+    "logout": "node src/logout.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "luxon": "^3.7.2",
+    "node-telegram-bot-api": "^0.66.0",
+    "nodemailer": "^7.0.9",
+    "puppeteer": "^24.23.0"
+  }
+}
